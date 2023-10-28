@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  nginx:
+    depends_on:
+      - webserver
+      - jwt-dev
+    image: docker.reg.ru/rookie/passportwo-frontend/master:latest
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:z
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:z
+      - ./nginx/django_admin_static:/var/nginx/django_admin_static:z
+      - ${FRONTEND_STATIC_PATH:-./front-static}:/www/passportwo-frontend/custom-dist:z
+      - ./nginx/docker-entrypoint.sh:/docker-entrypoint.sh:z
+    ports:
+      - 8080:80
+    command: 'sh -c "/docker-entrypoint.sh && nginx -g \"daemon off;\""'
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - "./db:/docker-entrypoint-initdb.d:z"
+    ports:
+      - "5445:5432"
+
+  reindexer:
+    image: reindexer/reindexer:v4.12.0
+    ports:
+      - "9088:9088"
+
+  frontend:
+    depends_on:
+      - db
+      - webserver
+    build:
+      context: "../docker.d/frontend"
+    volumes:
+      - "../www/static/frontend/:/usr/share/nginx/static/:z"
+    environment:
+      - NGINX_LISTEN=8080
+      - HEALTHUB_WEBSERVER_URI=http://webserver:8081
+      - S3_URI=https://s3.corp.healthub.ru:8090
+      - S3_PUBLIC_TOKEN=<secret>
+      - PUBLIC_HOST=127.0.0.1:8080
+    user: nginx
+    ports:
+      - "8080:8080"

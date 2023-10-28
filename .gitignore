@@ -125,4 +125,4 @@ media/
 /src/storage/logs/
 
 # auto-generated static files by django collectstatic command with init docker container
-/src/static/
+/src/www/webserver/static/

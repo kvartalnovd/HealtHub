@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  webserver:
+    depends_on:
+      - db
+    build:
+      context: ".."
+    environment:
+      - UWSGI_APP=webserver
+      - UWSGI_PORT=8082
+      - REINDEXER_URL=http://reindexer:9088
+    user: mrc
+    volumes:
+      - "../apps:/apps:z"
+      - "./HealtHub/config-dev.yml:/etc/HealtHub/config.yml:z"
+    command:
+      - "/bin/bash"
+      - "-c"
+      - "sleep 10 && /usr/local/bin/uwsgi --ini /uwsgi/uwsgi.ini --py-autoreload 1"

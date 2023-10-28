@@ -1,0 +1,125 @@
+replicaCount: 2
+
+cronjobs:
+  - name: import-users
+    schedule: "*/30 * * * *"
+    script: manage cron_import_users --save
+  - name: fire-users
+    schedule: "40 * * * *"
+    script: manage cron_fire_users --save
+  - name: import-rbc-events
+    schedule: "40 * * * *"
+    script: manage cron_import_rbc_events --save
+  - name: reindex
+    schedule: "*/5 * * * *"
+    script: manage reindexer drop_temp setup setup_temp load_users load_news load_blogs swap_namespace --params users news blogs
+  - name: eb-notify-birthday
+    schedule: "00 0 * * *"
+    script: manage eb_cron_notify_birthday
+  - name: sync-1c
+    schedule: "00 */1 * * *"
+    script: manage cron_sync_1c
+#  - name: sync-zoom
+#    schedule: "*/5 * * * *"
+#    script: manage sync_zoom
+  - name: send-birthday-wish
+    schedule: "*/10 7-16 * * 1-5"
+    script: manage send_birthday_wish
+  - name: import-structures-from-1c
+    schedule: "*/5 * * * *"
+    script: manage import_structures_from_1c
+
+
+haproxy-db:
+  - name: ct01
+    server: mrc-ct01.prod.int.nic.ru:5432
+  - name: dp01
+    server: mrc-dp01.prod.int.nic.ru:5432
+
+rocketdirect:
+  clients:
+    rocket-prod:
+      main:
+        auth_token: {{ vault "apps/data/my-ru-center/prod" "rocketdirect_prod_auth_token" }}
+    rocket-spaceweb:
+      main:
+        auth_token: {{ vault "apps/data/my-ru-center/prod" "rocketdirect_spaceweb_auth_token" }}
+
+core:
+  common:
+    csrf_trusted_origins:
+     - 'https://my.ru.center'
+    build_type: prod
+    debug: false
+    host_url: https://my.ru.center
+    session_cookie_name: mrc_session
+    nic_places:
+      host_proxy: https://rbc-workspace-prod.int.nic.ru/
+      prefix: /nic_places
+    sentry:
+      dsn: {{ vault "apps/data/my-ru-center/prod" "sentry_dsn" }}
+      environment: prod
+    database:
+      name: mrc
+      password: {{ vault "apps/data/my-ru-center/prod" "db_password" }}
+    jira:
+      user: myrucenter-bot
+      password: {{ vault "apps/data/my-ru-center/prod" "jira_password" }}
+    ldap_conn_str: ldap://ad-balancer.infra.nic.ru/:636
+    ldap_superuser: ad-myrbcru
+    ldap_superuser_password: {{ vault "apps/data/my-ru-center/prod" "ad_bind_password" }}
+    planner_key: {{ vault "apps/data/my-ru-center/prod" "planner_key" }}
+  back:
+    secret_key: {{ vault "apps/data/my-ru-center/prod" "secret_key" }}
+  front:
+    secret_key: {{ vault "apps/data/my-ru-center/prod" "secret_key" }}
+    service_tokens:
+      {{ vault "apps/data/my-ru-center/prod" "in_passport_token" }}: passport
+    event_broker:
+      url: https://event-broker.services.ctv.prod.k8s.int.nic.ru
+      token: {{ vault "apps/data/my-ru-center/prod" "eb_token" }}
+    s3:
+      access_key: {{ vault "apps/data/my-ru-center/prod" "s3_access_key" }}
+      secret_key: {{ vault "apps/data/my-ru-center/prod" "s3_secret_key" }}
+      bucket: mrc-prod
+    ldap_clients:
+      ad:
+        uri: ldaps://ad-balancer.infra.nic.ru
+        bind_dn: CN=ad-myrbcru,OU=Portal,OU=Service Accounts,DC=nic,DC=local
+        bind_password: {{ vault "apps/data/my-ru-center/prod" "ad_bind_password" }}
+      ldap:
+        uri: ldaps://rw-ldap.infra.nic.ru:636
+        bind_dn: uid=reset-hrwebldap.corp.hostcomm.ru,ou=virtual,ou=corp,ou=sites,o=hc
+        bind_password: {{ vault "apps/data/my-ru-center/prod" "ldap_bind_password" }}
+    h1c:
+      url: https://1c.corp.nic.ru/hrm_ruweb
+      emp_url: /hs/rw_hrm/get_emp
+      username: exch
+      password: {{ vault "apps/data/my-ru-center/prod" "1c_api_key" }}
+    zoom:
+      api_url: https://api.zoom.us/v2
+      account_id: {{ vault "apps/data/my-ru-center/prod" "zoom_account_id" }}
+      client_id: {{ vault "apps/data/my-ru-center/prod" "zoom_client_id" }}
+      client_secret: {{ vault "apps/data/my-ru-center/prod" "zoom_client_secret" }}
+    corp_sso_oauth2:
+      url: https://login.corp.nic.ru
+      redirect_host: https://my.ru.center
+      key: {{ vault "apps/data/my-ru-center/prod" "corp_sso_oauth2_key" }}
+      secret: {{ vault "apps/data/my-ru-center/prod" "corp_sso_oauth2_secret" }}
+    company_header: 'X-Company'
+    rocket:
+      url: https://rocket.nic.ru
+      bots:
+        - name: celebrate
+          user_id: {{ vault "apps/data/my-ru-center/prod" "rocket_bot_celebrate_user_id" }}
+          token: {{ vault "apps/data/my-ru-center/prod" "rocket_bot_celebrate_token" }}
+      scenarios:
+        - name: birthday_message
+          bot_name: celebrate
+          channel: '{{ vault "apps/data/my-ru-center/prod" "rocket_scenario_birthday_message_channel" }}'
+    passport:
+      url: https://passport.reg.ru
+      html_index: http://mrc-front/passport/index.html
+      profile_request_timeout: 10
+    private_key: |
+      {{ vault "apps/data/my-ru-center/prod" "private_key" | nindent 6 }}

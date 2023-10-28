@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  killgrave:
+    image: friendsofgo/killgrave:0.4.1
+    volumes:
+      - "./killgrave/imposters/:/imposters/:z"
+    command:
+      - "--config"
+      - "imposters/config.yml"
+    ports:
+      - "8099:3000"

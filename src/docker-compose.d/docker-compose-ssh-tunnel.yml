@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+
+  webserver:
+    depends_on:
+      - db
+    image: linuxserver/openssh-server
+    environment:
+      - DOCKER_MODS=linuxserver/mods:openssh-server-ssh-tunnel
+      - PUBLIC_KEY_FILE=/id_rsa.pub
+      - SUDO_ACCESS=true
+      - PASSWORD_ACCESS=true
+      - USER_NAME=HealthHub
+      - USER_PASSWORD=HealthHub
+    ports:
+      - "2222:2222"
