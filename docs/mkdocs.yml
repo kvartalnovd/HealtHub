@@ -1,0 +1,5 @@
+site_name: HealtHub
+site_description: HealtHub - is a social network for all who likes to live
+site_url: https://help.healthub.ru/
+theme:
+  name: material

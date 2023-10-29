@@ -1,17 +1,11 @@
 # Быстрый старт: Сборка и запуск программы
 
-## Содержание
-  1. [Содержание](#Содержание)
-  2. [Первый запуск](#Первый-запуск)
-  3. [Список команд для управления контейнерами](#Список-команд-для-управления-контейнерами)
-
-
 ## Первый запуск
 
 Клонируем репозиторий:
 
 ```bash
-git clone https://github.com/kvartalnovd/picassotest.git && cd picassotest
+git clone https://github.com/kvartalnovd/HealtHub.git && cd HealtHub
 ```
 
 Для управления Docker контейнерами создан ряд скриптов
@@ -34,10 +28,3 @@ git clone https://github.com/kvartalnovd/picassotest.git && cd picassotest
 Лучше использовать данные скрипты, чем вручную запускать docker-compose, т.к скрипты автоматически подгрузят окружение
 
 <br/>
-
-
-> **Пред.**: [Отчет о выполненной работы](work_report.md)
->
-> **Главная**: [README.md](/README.md)
->
-> **Далее**: [База данных: Подключение](database.md)
