@@ -4,4 +4,4 @@ appVersion: 0.0.1
 description: A Helm chart for Kubernetes
 
 type: application
-name: mrc-core
+name: healthub
