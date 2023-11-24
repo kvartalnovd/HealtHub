@@ -13,7 +13,6 @@ services:
       - REINDEXER_URL=http://reindexer:9088
     user: mrc
     volumes:
-      - "../apps:/apps:z"
       - "./HealtHub/config-dev.yml:/etc/HealtHub/config.yml:z"
     command:
       - "/bin/bash"
